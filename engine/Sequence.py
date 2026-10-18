@@ -8,10 +8,18 @@ class SequenceStatus(Enum):
 
 
 class Sequence:
-    def __init__(self, token_ids: list[int], block_size: int = 4):
+    def __init__(
+        self,
+        seq_id: int,
+        token_ids: list[int],
+        block_size: int = 4,
+        max_tokens: int = 128,
+    ):
+        self.seq_id = seq_id
         self.token_ids = list(token_ids)
         self.num_tokens = len(self.token_ids)
         self.num_prompt_tokens = self.num_tokens
+        self.max_tokens = max_tokens
 
         # 已计算完 KV、且对应块已在 block_table 中的 token 数
         self.num_cached_tokens = 0

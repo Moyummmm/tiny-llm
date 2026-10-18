@@ -14,11 +14,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from .Sequence import Sequence
-    from .scheduler import Scheduler
-    from .model_runner import ModelRunner
-    from ..config import Config
+from .Sequence import Sequence
+from .scheduler import Scheduler
+from .model_runner import ModelRunner
+from ..config import Config
 
 class LLMEngine:
     def __init__(
@@ -32,14 +31,27 @@ class LLMEngine:
         self.scheduler = scheduler
         self.model_runner = model_runner
         self.config = config
+        self._next_seq_id = 0
 
     def add_request(
         self,
         prompt: str | list[int],
         max_tokens: int = 128,
     ) -> Sequence:
-        seq = Sequence(self.tokenizer.tokenizer(prompt), block_size = self.config.block_size)
+        token_ids = (
+            self.tokenizer.encode(prompt)
+            if isinstance(prompt, str)
+            else list(prompt)
+        )
+        seq = Sequence(
+            seq_id=self._next_seq_id,
+            token_ids=token_ids,
+            block_size=self.config.block_size,
+            max_tokens=max_tokens,
+        )
+        self._next_seq_id += 1
         self.scheduler.add(seq)
+        return seq
 
     def step(self) -> list[tuple[int, list[int]]]:
         """执行一轮：

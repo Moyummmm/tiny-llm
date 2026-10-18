@@ -155,7 +155,7 @@ class BlockPool():
 
 
 
-class BlockManager():
+class BlockManager:
 
     def __init__(self, block_pool: BlockPool, config: Config):
         self.block_pool = block_pool
@@ -234,13 +234,15 @@ class BlockManager():
 
     def can_append(self, seq) -> bool:
         assert seq.block_size == self.block_size
+        if seq.num_blocks == 0:
+            return self.block_pool.can_allocate(1)
         if seq.last_block_num_tokens < seq.block_size:
             return True
         else:
             return self.block_pool.can_allocate(1)
 
     def may_append(self, seq) -> None:
-        if seq.last_block_num_tokens < self.block_size:
+        if seq.num_blocks > 0 and seq.last_block_num_tokens < self.block_size:
             return
         
         seq.block_table.append(self.block_pool.allocate_new(1)[0])
@@ -257,5 +259,6 @@ class BlockManager():
             token_ids = seq.block(i)
             h = self.block_pool.compute_hash(token_ids, h)
             self.block_pool.set_hash(block_id, h, token_ids)
+
 
 

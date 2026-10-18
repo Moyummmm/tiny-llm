@@ -127,3 +127,12 @@ class Scheduler:
     def has_unfinished(self) -> bool:
         """仍有等待或运行中的序列时返回 True。"""
         return bool(self.waiting or self.running)
+
+    def clear(self) -> None:
+        """丢弃所有请求并归还已占用的块。"""
+        for seq in list(self.running):
+            if seq.block_table:
+                self.block_manager.deallocate(seq)
+            seq.num_scheduled_tokens = 0
+        self.waiting.clear()
+        self.running.clear()

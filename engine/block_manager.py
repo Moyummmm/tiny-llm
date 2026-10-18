@@ -222,7 +222,8 @@ class BlockManager:
     def deallocate(self, seq) -> None:
         assert seq.block_table
         assert seq.block_size == self.block_size
-        assert len(seq.block_table) == seq.num_blocks
+        # 可能多出一块：prefill 后为采样出的 token 预留的块
+        assert len(seq.block_table) >= seq.num_blocks
 
         for v in seq.block_table:
             self.block_pool.free(v)

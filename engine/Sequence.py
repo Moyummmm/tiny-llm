@@ -51,6 +51,11 @@ class Sequence:
     def is_finished(self) -> bool:
         return self.status == SequenceStatus.FINISHED
 
+    @property
+    def completion_token_ids(self) -> list[int]:
+        """只返回生成出来的部分，不含 prompt。"""
+        return self.token_ids[self.num_prompt_tokens:]
+
     def block(self, i: int) -> list[int]:
         assert 0 <= i < self.num_blocks
         return self.token_ids[i * self.block_size:(i + 1) * self.block_size]
